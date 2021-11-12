@@ -17,4 +17,9 @@ public interface SyslogService extends CrudListService<SysLog, SysLog> {
      */
     ResponseData saveApiLog(SysLog log);
 
+    /**
+     * 首页统计
+     * @return
+     */
+    ResponseData index();
 }

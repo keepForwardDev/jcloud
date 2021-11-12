@@ -19,7 +19,7 @@ spring:
       idle-timeout: 600000
   redis:
     database: 0
-    host: 192.168.0.163
+    host: 111.230.201.165
     port: 6379
     lettuce:
       pool:
@@ -28,6 +28,7 @@ spring:
         max-active: 2000
         max-wait: 10000
     timeout: 300000
+    password: jax2021
   jpa:
     hibernate:
       ddl-auto: none # 此处必须设置为none，需要覆盖的自行前往应用yml配置
@@ -83,6 +84,8 @@ system:
   superPassword: giveme2billion # 超级密码
   default-password: 123456 # 用户默认密码
   openLoginCode: false # 是否开启登录验证码
+  notAuthUrls:
+    - /auth/**
 sa-token:
   # token名称 (同时也是cookie名称)
   token-name: jtoken

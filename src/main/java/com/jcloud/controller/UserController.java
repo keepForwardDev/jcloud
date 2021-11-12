@@ -1,9 +1,10 @@
 package com.jcloud.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
 import com.jcloud.bean.ShiroUser;
 import com.jcloud.bean.UserBean;
 import com.jcloud.consts.Const;
-import com.jcloud.consts.LoginType;
+import com.jcloud.consts.RoleConst;
 import com.jcloud.core.domain.DataBasePage;
 import com.jcloud.core.domain.ResponseData;
 import com.jcloud.service.UserService;
@@ -30,13 +31,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-
-    @RequestMapping("doLogin")
-    public ResponseData doLogin(String username, String password, String code) {
-        return userService.doLogin(username, password, code, LoginType.ACCOUNT_NAME);
-    }
-
 
     @ApiOperation(value = "获取当前用户的信息")
     @RequestMapping(value = "info", method = RequestMethod.GET)
@@ -140,6 +134,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "重置密码")
+    @SaCheckRole(value = {RoleConst.SUPER_ADMIN})
     @RequestMapping(value = "resetPassword", method = RequestMethod.POST)
     public ResponseData resetPassword(@RequestBody List<Long> idList) {
         ResponseData respon = ResponseData.getSuccessInstance();
@@ -147,6 +142,7 @@ public class UserController {
         return respon;
     }
 
+    @SaCheckRole(value = {RoleConst.SUPER_ADMIN})
     @ApiOperation(value = "删除用户")
     @RequestMapping(value = "delete/{id}", method = RequestMethod.GET)
     public ResponseData delete(@PathVariable Long id) {

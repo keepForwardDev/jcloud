@@ -1,11 +1,14 @@
 package com.jcloud.core.config;
 
+import cn.dev33.satoken.interceptor.SaAnnotationInterceptor;
 import cn.dev33.satoken.interceptor.SaRouteInterceptor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import com.jcloud.consts.Const;
 import com.jcloud.core.service.LongToStringSerializer;
+import com.jcloud.core.support.DictionaryBeanSerializerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -29,6 +32,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Autowired
     private SystemProperty systemProperty;
+
+
 
     @Bean
     public HttpMessageConverter<String> responseBodyConverter() {
@@ -67,13 +72,19 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Primary
     @Bean
     public ObjectMapper objectMapper (Jackson2ObjectMapperBuilder builder) {
+        // 设置objectMapper 支持 字典转换
+        DictionaryBeanSerializerFactory serializerFactory = new DictionaryBeanSerializerFactory(null);
         ObjectMapper objectMapper = builder.createXmlMapper(false).build();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         SimpleModule simpleModule = new SimpleModule();
+        SimpleSerializers simpleSerializers = new SimpleSerializers();
         LongToStringSerializer longToStringSerializer = new LongToStringSerializer(Long.class);
         simpleModule.addSerializer(Long.class, longToStringSerializer);
         simpleModule.addSerializer(Long.TYPE, longToStringSerializer);
+        simpleSerializers.addSerializer(Long.class, longToStringSerializer);
+        simpleSerializers.addSerializer(Long.TYPE, longToStringSerializer);
         objectMapper.registerModule(simpleModule);
+        objectMapper.setSerializerFactory(serializerFactory.withAdditionalSerializers(simpleSerializers));
         return objectMapper;
     }
 
@@ -83,7 +94,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // 注册Sa-Token的路由拦截器
         registry.addInterceptor(new SaRouteInterceptor())
                 .addPathPatterns("/**")
-                .excludePathPatterns("/user/doLogin");
+                .excludePathPatterns(systemProperty.getNotAuthUrls());
+        registry.addInterceptor(new SaAnnotationInterceptor()).addPathPatterns("/**");
     }
 
     //    /**

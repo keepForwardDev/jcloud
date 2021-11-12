@@ -1,13 +1,9 @@
 package com.jcloud.service.impl;
 
-import cn.dev33.satoken.SaManager;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.jcloud.bean.PrivilegeBean;
-import com.jcloud.bean.PrivilegesSaveBean;
-import com.jcloud.bean.ShiroUser;
-import com.jcloud.bean.UserBean;
+import com.jcloud.bean.*;
 import com.jcloud.consts.Const;
 import com.jcloud.consts.PrivilegesType;
 import com.jcloud.consts.ResType;
@@ -16,13 +12,16 @@ import com.jcloud.core.exception.BizException;
 import com.jcloud.core.service.BCryptPasswordEncoder;
 import com.jcloud.core.service.DefaultOrmService;
 import com.jcloud.core.service.PasswordEncoder;
+import com.jcloud.entity.Resource;
 import com.jcloud.entity.Role;
 import com.jcloud.entity.User;
 import com.jcloud.entity.UserRole;
 import com.jcloud.mapper.DepartmentMapper;
+import com.jcloud.mapper.ResourceMapper;
 import com.jcloud.mapper.UserMapper;
 import com.jcloud.mapper.UserRoleMapper;
 import com.jcloud.service.LoginService;
+import com.jcloud.service.MenuService;
 import com.jcloud.service.UserService;
 import com.jcloud.utils.*;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +37,6 @@ import org.springframework.util.Assert;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,6 +62,12 @@ public class UserServiceImpl extends DefaultOrmService<UserMapper, User, UserBea
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+
+    @Autowired
+    private MenuService menuService;
+
+    @Autowired
+    private ResourceMapper resourceMapper;
 
     @Override
     public UserBean convert(User user) {
@@ -326,7 +330,7 @@ public class UserServiceImpl extends DefaultOrmService<UserMapper, User, UserBea
     }
 
     @Override
-    public ResponseData doLogin(String username, String password, String code, String loginType) {
+    public ResponseData doLogin(String username, String password, String code, String loginType, Integer info) {
         ResponseData responseData = new ResponseData();
         ShiroUser shiroUser = null;
         if (StringUtils.isBlank(username)) {
@@ -344,25 +348,15 @@ public class UserServiceImpl extends DefaultOrmService<UserMapper, User, UserBea
         if (shiroUser == null) {
             responseData.setMsg(Const.USER_NOT_FOUND);
         } else {
-            // 查询权限
-            PrivilegeBean privilegeBean = new PrivilegeBean();
-            privilegeBean.setPrivilegeType(PrivilegesType.USER);
-            privilegeBean.setId(shiroUser.getId());
-            privilegeBean.setResourceType(ResType.MENU);
-            // 菜单
-            PrivilegesSaveBean menuPrivileges = userPrivilegesService.getAllPrivileges(privilegeBean);
-            if (!menuPrivileges.getResourceIds().isEmpty()) {
-
-            }
-            // 自定义权限
-            privilegeBean.setResourceType(ResType.RESOURCE);
-            PrivilegesSaveBean resourcePrivileges = userPrivilegesService.getAllPrivileges(privilegeBean);
-
+            setShiroPrivileges(shiroUser);
             SecurityUtil.setCurrentUser(shiroUser);
             StpUtil.login(shiroUser.getId());
             responseData.setMsg(Const.CODE_SUCCESS_STR);
             responseData.setCode(Const.CODE_SUCCESS);
-            responseData.setData(StpUtil.getTokenInfo().getTokenValue());
+            if (BooleanUtil.numberToBoolean(info)) {
+                responseData.setData(shiroUser);
+            }
+            responseData.setReserveData(StpUtil.getTokenInfo().getTokenValue());
         }
         return responseData;
     }
@@ -391,14 +385,45 @@ public class UserServiceImpl extends DefaultOrmService<UserMapper, User, UserBea
             ShiroUser loginUser = new ShiroUser();
             BeanUtils.copyProperties(user, loginUser);
             loginUser.setEnabled(user.getEnabled() == 1);
-            List<Role> roleBeans = userRoleMapper.findByUserId(user.getId());
-            roleBeans.forEach(userRole -> {
-                loginUser.getRolesCode().add(userRole.getCode());
-            });
+            setShiroPrivileges(loginUser);
             return loginUser;
         }
         return null;
     }
+
+    /**
+     * 获取用户权限
+     *
+     * @param shiroUser
+     */
+    public void setShiroPrivileges(ShiroUser shiroUser) {
+        // 角色
+        List<Role> roleBeans = userRoleMapper.findByUserId(shiroUser.getId());
+        for (Role roleBean : roleBeans) {
+            shiroUser.getRolesCode().add(roleBean.getCode());
+        }
+        // 查询权限
+        PrivilegeBean privilegeBean = new PrivilegeBean();
+        privilegeBean.setPrivilegeType(PrivilegesType.USER);
+        privilegeBean.setId(shiroUser.getId());
+        privilegeBean.setResourceType(ResType.MENU);
+        // 菜单
+        PrivilegesSaveBean menuPrivileges = userPrivilegesService.getAllPrivileges(privilegeBean);
+        if (!menuPrivileges.getResourceIds().isEmpty()) {
+            List<UserRouter> userRouters = menuService.getRoutersByIds(menuPrivileges.getResourceIds());
+            shiroUser.setMenus(userRouters);
+        }
+        // 自定义权限
+        privilegeBean.setResourceType(ResType.RESOURCE);
+        PrivilegesSaveBean resourcePrivileges = userPrivilegesService.getAllPrivileges(privilegeBean);
+        if (!resourcePrivileges.getResourceIds().isEmpty()) {
+            List<Resource> resources = resourceMapper.selectBatchIds(resourcePrivileges.getResourceIds());
+            for (Resource resource : resources) {
+                shiroUser.getResourcesCode().add(resource.getCode());
+            }
+        }
+    }
+
 
     public User findByPhone(String phone) {
         QueryWrapper<User> query = new QueryWrapper<>();

@@ -2,6 +2,7 @@ package com.jcloud.service;
 
 import com.jcloud.bean.Router;
 import com.jcloud.bean.TreeNode;
+import com.jcloud.bean.UserRouter;
 import com.jcloud.core.domain.CommonPage;
 import com.jcloud.core.domain.ResponseData;
 import com.jcloud.core.service.CrudListService;
@@ -48,5 +49,5 @@ public interface MenuService extends CrudListService<Menu, Router> {
      * @param idList
      * @return
      */
-    Map<String, List<Router>> getRoutersByIds(List<Long> idList);
+    List<UserRouter> getRoutersByIds(List<Long> idList);
 }

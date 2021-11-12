@@ -3,6 +3,7 @@ package com.jcloud.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.jcloud.bean.ApiRequest;
 import com.jcloud.bean.ApiResult;
+import com.jcloud.bean.IndexStat;
 import com.jcloud.consts.Const;
 import com.jcloud.core.domain.ResponseData;
 import com.jcloud.core.service.DefaultOrmService;
@@ -88,6 +89,19 @@ public class SyslogServiceServiceImpl extends DefaultOrmService<SysLogMapper, Sy
             }
         }
         return responseData;
+    }
+
+    @Override
+    public ResponseData index() {
+        IndexStat indexStat = new IndexStat();
+        indexStat.setClientNumber(clientDetailsMapper.selectCount(null));
+        indexStat.setUserNumber(userMapper.selectCount(null));
+        indexStat.setDepartmentNumber(departmentMapper.selectCount(null));
+        indexStat.setCurrentCreateUser(userMapper.currentDayRegUser());
+        indexStat.setApiCall(baseMapper.totalApiCall());
+        indexStat.setCurrentApiCall(baseMapper.currentDayApiCall());
+        indexStat.setCurrentUserLogin(baseMapper.currentLoginNumber());
+        return ResponseData.getSuccessInstance(indexStat);
     }
 
     private void pass(ResponseData responseData, SysLog log) {

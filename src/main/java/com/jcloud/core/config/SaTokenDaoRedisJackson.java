@@ -25,7 +25,6 @@ public class SaTokenDaoRedisJackson implements SaTokenDao {
     @Autowired
     private RedisService redisService;
 
-    public boolean isInit;
 
     public SaTokenDaoRedisJackson() {
     }

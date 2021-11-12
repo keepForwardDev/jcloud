@@ -4,10 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jcloud.bean.Router;
 import com.jcloud.bean.TreeNode;
+import com.jcloud.bean.UserRouter;
+import com.jcloud.consts.DictionaryConst;
 import com.jcloud.core.domain.CommonPage;
 import com.jcloud.core.domain.DataBasePage;
 import com.jcloud.core.domain.ResponseData;
 import com.jcloud.core.service.DefaultOrmService;
+import com.jcloud.core.support.DictionaryProvider;
 import com.jcloud.entity.Menu;
 import com.jcloud.mapper.MenuMapper;
 import com.jcloud.service.MenuService;
@@ -220,12 +223,21 @@ public class MenuServiceImpl extends DefaultOrmService<MenuMapper, Menu, Router>
 
 
     @Override
-    public List<Router> getRoutersByIds(List<Long> idList) {
+    public List<UserRouter> getRoutersByIds(List<Long> idList) {
         QueryWrapper<Menu> queryWrapper = new QueryWrapper();
         queryWrapper.in("id", idList);
         queryWrapper.orderByAsc("sort", "id");
         List<Menu> menus = baseMapper.selectList(queryWrapper);
-        return getRouters(menus);
+        Map<Long, List<Menu>> menuGroup = menus.stream().collect(Collectors.groupingBy(r -> r.getType()));
+        List<UserRouter> userRouters = new ArrayList<>();
+        menuGroup.forEach((type, ms) -> {
+            UserRouter userRouter = new UserRouter();
+            userRouter.setId(type);
+            userRouter.setName(DictionaryProvider.service(DictionaryConst.SIMPLE_DICTIONARY).getNameById(type));
+            userRouter.setRouters(getRouters(ms));
+            userRouters.add(userRouter);
+        });
+        return userRouters;
     }
 
 

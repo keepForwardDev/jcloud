@@ -1,5 +1,7 @@
 package com.jcloud.core.exception;
 
+import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.exception.NotPermissionException;
 import com.jcloud.consts.Const;
 import com.jcloud.core.domain.ResponseData;
 import com.jcloud.utils.JsonUtils;
@@ -63,6 +65,24 @@ public class GlobalExceptionHandler {
         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         ResponseData commonRespon = new ResponseData();
         commonRespon.setMsg(String.format("%s [%s]", Const.INTERNAL_ERROR, e.getMessage()));
+        return commonRespon;
+    }
+
+
+    @ExceptionHandler(value = NotPermissionException.class)
+    @ResponseBody
+    public ResponseData notPermissionException(NotPermissionException e) {
+        ResponseData commonRespon = new ResponseData();
+        commonRespon.setData("无权访问！");
+        return commonRespon;
+    }
+
+    @ExceptionHandler(value = NotLoginException.class)
+    @ResponseBody
+    public ResponseData notLoginException(NotLoginException e) {
+        ResponseData commonRespon = new ResponseData();
+        commonRespon.setCode(Const.CODE_NO_LOGIN);
+        commonRespon.setData(Const.CODE_NO_LOGIN_STR);
         return commonRespon;
     }
 }

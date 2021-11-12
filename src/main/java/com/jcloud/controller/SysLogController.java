@@ -40,4 +40,9 @@ public class SysLogController {
         return syslogService.saveApiLog(log);
     }
 
+    @ApiOperation(value = "首页统计")
+    @GetMapping("/index")
+    public ResponseData index() {
+        return syslogService.index();
+    }
 }

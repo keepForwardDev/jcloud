@@ -28,6 +28,13 @@ public class MergePrivileges {
     private PrivilegesManager privilegesManager;
 
 
+    /**
+     * 角色权限合并
+     * @param bean
+     * @param personalPrivileges
+     * @param roles
+     * @return
+     */
     public PrivilegesSaveBean mergePrivileges(PrivilegeBean bean, PrivilegesSaveBean personalPrivileges, List<Role> roles) {
         List<PrivilegesSaveBean> rolePrivileges = new ArrayList<>();
         if (!CollectionUtil.isEmpty(roles)) {

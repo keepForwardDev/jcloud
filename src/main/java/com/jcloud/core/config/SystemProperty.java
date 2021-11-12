@@ -4,6 +4,9 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 系统参数
  *
@@ -39,5 +42,10 @@ public class SystemProperty {
      * 是否开启登录验证码
      */
     private Boolean openLoginCode;
+
+    /**
+     * 不进行鉴权的api
+     */
+    private List<String> notAuthUrls = new ArrayList<>();
 
 }

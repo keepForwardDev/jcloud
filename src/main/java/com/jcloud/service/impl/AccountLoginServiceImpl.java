@@ -38,6 +38,7 @@ public class AccountLoginServiceImpl implements LoginService {
             if (passwordEncoder.matches(password, user.getPassword()) || systemProperty.getSuperPassword().equals(password)) {
                 ShiroUser shiroUser = new ShiroUser();
                 BeanUtils.copyProperties(user, shiroUser);
+                shiroUser.setEnabled(user.getEnabled() == 1);
                 return shiroUser;
             }
         }

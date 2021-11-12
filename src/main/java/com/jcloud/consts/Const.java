@@ -28,7 +28,7 @@ public class Const {
     /**
      * 用户存在redis 中的key
      */
-    public final static String USER_INFO_KEY = "user_";
+    public final static String USER_INFO_KEY = "user_info_";
 
 
     public final static String CODE_ERROR_CODE_STR = "验证码错误，请重新输入！";

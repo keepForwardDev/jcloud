@@ -85,7 +85,8 @@ public interface UserService extends CrudListService<User, UserBean> {
      * @param password
      * @param code 验证码
      * @param loginType  登录方式
+     * @param info 是否同步返回用户数据
      * @return
      */
-    public ResponseData doLogin(String username, String password, String code, String loginType);
+    public ResponseData doLogin(String username, String password, String code, String loginType, Integer info);
 }
