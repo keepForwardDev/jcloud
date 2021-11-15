@@ -8,9 +8,9 @@ spring:
   main:
     allow-bean-definition-overriding: true
   datasource:
-    url: jdbc:mysql://192.168.0.163:3306/boshi-data-center?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&serverTimezone=GMT%2B8&rewriteBatchedStatements=true
+    url: jdbc:mysql://localhost:3306/xx?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&serverTimezone=GMT%2B8&rewriteBatchedStatements=true
     username: root
-    password: Boshi@2021
+    password: xx
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
@@ -19,7 +19,7 @@ spring:
       idle-timeout: 600000
   redis:
     database: 0
-    host: 111.230.201.165
+    host: localhost
     port: 6379
     lettuce:
       pool:
@@ -28,7 +28,7 @@ spring:
         max-active: 2000
         max-wait: 10000
     timeout: 300000
-    password: jax2021
+    password: xx
   jpa:
     hibernate:
       ddl-auto: none # 此处必须设置为none，需要覆盖的自行前往应用yml配置
@@ -81,7 +81,7 @@ swagger: # swagger 配置
 system:
   extPath: D:/upload # 外部地址，用于存放一些静态文件，可以通过/ext 获取
   domain: www.pinzhi365.com # host
-  superPassword: giveme2billion # 超级密码
+  superPassword: xxxxd # 超级密码
   default-password: 123456 # 用户默认密码
   openLoginCode: false # 是否开启登录验证码
   notAuthUrls:
@@ -89,10 +89,10 @@ system:
 sa-token:
   # token名称 (同时也是cookie名称)
   token-name: jtoken
-  # token有效期，单位s 默认30天, -1代表永不过期
+  # token有效期，单位s 默认1天, -1代表永不过期
   timeout: 86400
   # token临时有效期 (指定时间内无操作就视为token过期) 单位: 秒
-  activity-timeout: -1
+  #activity-timeout: 1800
   # 是否允许同一账号并发登录 (为true时允许一起登录, 为false时新登录挤掉旧登录)
   is-concurrent: true
   # 在多人登录同一账号时，是否共用一个token (为true时所有登录共用一个token, 为false时每次登录新建一个token)

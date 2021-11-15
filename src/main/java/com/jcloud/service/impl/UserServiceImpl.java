@@ -7,6 +7,7 @@ import com.jcloud.bean.*;
 import com.jcloud.consts.Const;
 import com.jcloud.consts.PrivilegesType;
 import com.jcloud.consts.ResType;
+import com.jcloud.core.config.SaLoginSetting;
 import com.jcloud.core.domain.ResponseData;
 import com.jcloud.core.exception.BizException;
 import com.jcloud.core.service.BCryptPasswordEncoder;
@@ -330,7 +331,7 @@ public class UserServiceImpl extends DefaultOrmService<UserMapper, User, UserBea
     }
 
     @Override
-    public ResponseData doLogin(String username, String password, String code, String loginType, Integer info) {
+    public ResponseData doLogin(String username, String password, String code, String loginType, Integer rememberme, Integer info) {
         ResponseData responseData = new ResponseData();
         ShiroUser shiroUser = null;
         if (StringUtils.isBlank(username)) {
@@ -350,7 +351,8 @@ public class UserServiceImpl extends DefaultOrmService<UserMapper, User, UserBea
         } else {
             setShiroPrivileges(shiroUser);
             SecurityUtil.setCurrentUser(shiroUser);
-            StpUtil.login(shiroUser.getId());
+            SaLoginSetting saLoginModel = new SaLoginSetting(rememberme);
+            StpUtil.login(shiroUser.getId(), saLoginModel);
             responseData.setMsg(Const.CODE_SUCCESS_STR);
             responseData.setCode(Const.CODE_SUCCESS);
             if (BooleanUtil.numberToBoolean(info)) {

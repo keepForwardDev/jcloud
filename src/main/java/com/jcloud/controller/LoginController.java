@@ -37,8 +37,8 @@ public class LoginController {
 
     @RequestMapping(value = "login", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseData doLogin(@ApiParam(value = "用户名") String username, @ApiParam(value = "密码") String password, @ApiParam(value = "验证码") String code, @ApiParam(value = "是否同步返回用户信息") Integer info) {
-        return userService.doLogin(username, password, code, LoginType.ACCOUNT_NAME, info);
+    public ResponseData doLogin(@ApiParam(value = "用户名") String username, @ApiParam(value = "密码") String password, @ApiParam(value = "验证码") String code, @ApiParam(value = "是否记住密码") Integer rememberme, @ApiParam(value = "是否同步返回用户信息") Integer info) {
+        return userService.doLogin(username, password, code, LoginType.ACCOUNT_NAME, rememberme, info);
     }
 
     @RequestMapping(value = "createCode", method = RequestMethod.GET)
