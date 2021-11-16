@@ -92,10 +92,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 注册Sa-Token的路由拦截器
+        PatternMacher patternMacher = new PatternMacher();
         registry.addInterceptor(new SaRouteInterceptor())
                 .addPathPatterns("/**")
-                .excludePathPatterns(systemProperty.getNotAuthUrls());
-        registry.addInterceptor(new SaAnnotationInterceptor()).addPathPatterns("/**");
+                .excludePathPatterns(systemProperty.getNotAuthUrls()).pathMatcher(patternMacher);
+        registry.addInterceptor(new SaAnnotationInterceptor()).addPathPatterns("/**").pathMatcher(patternMacher);
     }
 
     //    /**

@@ -10,9 +10,9 @@ import com.jcloud.utils.BooleanUtil;
  */
 public class SaLoginSetting extends SaLoginModel {
 
-    public Integer remeberme;
+    private Integer remeberme;
 
-    public SaLoginSetting(Integer rememberme) {
+    public SaLoginSetting(Integer remeberme) {
         this.remeberme = remeberme;
     }
 

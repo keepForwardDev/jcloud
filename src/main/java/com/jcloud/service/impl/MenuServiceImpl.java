@@ -233,7 +233,6 @@ public class MenuServiceImpl extends DefaultOrmService<MenuMapper, Menu, Router>
         menuGroup.forEach((type, ms) -> {
             UserRouter userRouter = new UserRouter();
             userRouter.setId(type);
-            userRouter.setName(DictionaryProvider.service(DictionaryConst.SIMPLE_DICTIONARY).getNameById(type));
             userRouter.setRouters(getRouters(ms));
             userRouters.add(userRouter);
         });

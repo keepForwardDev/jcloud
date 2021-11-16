@@ -1,5 +1,7 @@
 package com.jcloud.bean;
 
+import com.jcloud.consts.DictionaryConst;
+import com.jcloud.core.support.JacksonDicMapping;
 import lombok.Data;
 
 import java.util.List;
@@ -15,12 +17,9 @@ public class UserRouter {
     /**
      * 菜单对应的字典类型id
      */
+    @JacksonDicMapping(dictionaryConst = DictionaryConst.SIMPLE_DICTIONARY, fieldName = "name")
     private Long id;
 
-    /**
-     * 菜单名称
-     */
-    private String name;
 
     /**
      * 路由

@@ -4,6 +4,7 @@ import cn.dev33.satoken.listener.SaTokenListener;
 import cn.dev33.satoken.stp.SaLoginModel;
 import com.jcloud.consts.Const;
 import com.jcloud.core.config.RedisService;
+import com.jcloud.service.SyslogService;
 import com.jcloud.utils.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,13 @@ public class LoginListener implements SaTokenListener {
     @Autowired
     private RedisService redisService;
 
+    @Autowired
+    private SyslogService syslogService;
+
     @Override
     public void doLogin(String loginType, Object loginId, SaLoginModel loginModel) {
         log.info(SecurityUtil.getCurrentUser().getName() + "：登录系统！");
+        syslogService.createLoginLog();
     }
 
     @Override

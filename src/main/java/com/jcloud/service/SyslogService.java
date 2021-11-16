@@ -22,4 +22,9 @@ public interface SyslogService extends CrudListService<SysLog, SysLog> {
      * @return
      */
     ResponseData index();
+
+    /**
+     * 创建登录日志
+     */
+    public void createLoginLog();
 }

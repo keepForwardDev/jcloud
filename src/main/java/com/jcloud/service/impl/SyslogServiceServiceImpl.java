@@ -1,9 +1,11 @@
 package com.jcloud.service.impl;
 
+import cn.hutool.extra.servlet.ServletUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.jcloud.bean.ApiRequest;
 import com.jcloud.bean.ApiResult;
 import com.jcloud.bean.IndexStat;
+import com.jcloud.bean.ShiroUser;
 import com.jcloud.consts.Const;
 import com.jcloud.core.domain.ResponseData;
 import com.jcloud.core.service.DefaultOrmService;
@@ -14,13 +16,17 @@ import com.jcloud.mapper.SysLogMapper;
 import com.jcloud.mapper.UserMapper;
 import com.jcloud.service.LogPersistStrategy;
 import com.jcloud.service.SyslogService;
+import com.jcloud.utils.SecurityUtil;
+import com.jcloud.utils.WebUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.Date;
 
 /**
  * @author jiaxm
@@ -102,6 +108,20 @@ public class SyslogServiceServiceImpl extends DefaultOrmService<SysLogMapper, Sy
         indexStat.setCurrentApiCall(baseMapper.currentDayApiCall());
         indexStat.setCurrentUserLogin(baseMapper.currentLoginNumber());
         return ResponseData.getSuccessInstance(indexStat);
+    }
+
+    @Async
+    @Override
+    public void createLoginLog() {
+        ShiroUser user = SecurityUtil.getCurrentUser();
+        SysLog sysLog = new SysLog();
+        sysLog.setType(0);
+        sysLog.setTitle("登录日志");
+        sysLog.setContent(user.getAccount() + "登录系统");
+        sysLog.setCreateTime(new Date());
+        sysLog.setCreateUserId(user.getId());
+        sysLog.setRemoteAddr(ServletUtil.getClientIP(WebUtil.getRequest()));
+        baseMapper.insert(sysLog);
     }
 
     private void pass(ResponseData responseData, SysLog log) {
