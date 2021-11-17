@@ -115,7 +115,6 @@ public class SyslogServiceServiceImpl extends DefaultOrmService<SysLogMapper, Sy
     @Async
     @Override
     public void createLoginLog() {
-        log.info("sss");
         ShiroUser user = SecurityUtil.getCurrentUser();
         SysLog sysLog = new SysLog();
         sysLog.setType(0);
