@@ -18,6 +18,7 @@ import com.jcloud.service.LogPersistStrategy;
 import com.jcloud.service.SyslogService;
 import com.jcloud.utils.SecurityUtil;
 import com.jcloud.utils.WebUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -32,6 +33,7 @@ import java.util.Date;
  * @author jiaxm
  * @date 2021/9/16
  */
+@Slf4j
 @Service
 public class SyslogServiceServiceImpl extends DefaultOrmService<SysLogMapper, SysLog, SysLog> implements SyslogService {
 
@@ -113,6 +115,7 @@ public class SyslogServiceServiceImpl extends DefaultOrmService<SysLogMapper, Sy
     @Async
     @Override
     public void createLoginLog() {
+        log.info("sss");
         ShiroUser user = SecurityUtil.getCurrentUser();
         SysLog sysLog = new SysLog();
         sysLog.setType(0);
