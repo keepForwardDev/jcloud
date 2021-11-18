@@ -44,6 +44,4 @@ public class DictionaryBase implements Serializable {
 
     private Long createUserId;
 
-    private Date modifyTime;
-
 }

@@ -7,6 +7,7 @@ import com.jcloud.consts.Const;
 import com.jcloud.consts.DictionaryConst;
 import com.jcloud.core.domain.ResponseData;
 import com.jcloud.core.support.DictionaryProvider;
+import com.jcloud.entity.SimpleDictionaryEntity;
 import com.jcloud.service.DictionaryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -155,6 +156,42 @@ public class DictionaryController {
         dictionaryProvider.refresh(key);
         return ResponseData.getSuccessInstance();
     }
+
+    @ApiOperation(value = "根据id获取详情")
+    @RequestMapping(value = "/getInfo/{key}/{id}", method = RequestMethod.GET)
+    public ResponseData getInfo(@PathVariable String key, @PathVariable Long id) {
+        ResponseData responseData = new ResponseData();
+        getDictionaryService(key).ifPresent(r -> {
+            responseData.setData(r.databaseGetById(id));
+            responseData.setCode(Const.CODE_SUCCESS);
+            responseData.setMsg(Const.CODE_SUCCESS_STR);
+        });
+        return responseData;
+    }
+
+    @ApiOperation(value = "根据父级id获取列表")
+    @RequestMapping(value = "/getByParentId/{key}/{parentId}", method = RequestMethod.GET)
+    public ResponseData getByParentId(@PathVariable String key, @PathVariable Long parentId) {
+        ResponseData responseData = new ResponseData();
+        getDictionaryService(key).ifPresent(r -> {
+            responseData.setData(r.getByParentId(parentId));
+            responseData.setCode(Const.CODE_SUCCESS);
+            responseData.setMsg(Const.CODE_SUCCESS_STR);
+        });
+        return responseData;
+    }
+
+    @ApiOperation(value = "新增或更新 删除简单字典")
+    @RequestMapping(value = "/cudOperation", method = RequestMethod.POST)
+    public ResponseData cudOperation(SimpleDictionaryEntity simpleDictionary) {
+        getDictionaryService(DictionaryConst.SIMPLE_DICTIONARY).ifPresent(r -> {
+            r.cudOperation(simpleDictionary);
+        });
+        return ResponseData.getSuccessInstance();
+    }
+
+
+
 
     private Optional<DictionaryService> getDictionaryService(String key) {
         return Optional.ofNullable(DictionaryProvider.service(key));

@@ -1,11 +1,13 @@
 package com.jcloud.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.jcloud.bean.DictionaryBase;
 import lombok.Data;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * 字典
@@ -32,4 +34,8 @@ public class SimpleDictionaryEntity extends DictionaryBase {
      * 备注
      */
     private String remark;
+
+    @TableField(exist = false)
+    @Transient
+    private String parentName;
 }

@@ -1,19 +1,20 @@
 package com.jcloud.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.jcloud.bean.DictionaryBase;
 import com.jcloud.bean.LabelNode;
 import com.jcloud.bean.TreeNode;
 import com.jcloud.consts.DictionaryConst;
 import com.jcloud.entity.SimpleDictionaryEntity;
 import com.jcloud.mapper.SimpleDictionaryEntityMapper;
+import com.jcloud.utils.BooleanUtil;
+import com.jcloud.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +29,9 @@ public class SimpleDictionary extends AbstractDictionaryService<SimpleDictionary
     @Autowired
     private SimpleDictionaryEntityMapper simpleDictionaryEntityMapper;
 
+    @Autowired
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+
     @Override
     public List<SimpleDictionaryEntity> getData() {
         QueryWrapper<SimpleDictionaryEntity> queryWrapper = new QueryWrapper();
@@ -38,6 +42,59 @@ public class SimpleDictionary extends AbstractDictionaryService<SimpleDictionary
     @Override
     public String getDictionaryKey() {
         return DictionaryConst.SIMPLE_DICTIONARY;
+    }
+
+    @Override
+    public void cudOperation(Object dictionaryBase) {
+        SimpleDictionaryEntity simpleDictionaryEntity = (SimpleDictionaryEntity) dictionaryBase;
+        if (BooleanUtil.numberToBoolean(simpleDictionaryEntity.getDeleted())) { // 删除
+            deleteSimpleDictionary(simpleDictionaryEntity.getId());
+        } else {
+            if (simpleDictionaryEntity.getId() != null) {
+                SimpleDictionaryEntity entity = simpleDictionaryEntityMapper.selectById(simpleDictionaryEntity.getId());
+                entity.setNameKey(simpleDictionaryEntity.getNameKey());
+                entity.setName(simpleDictionaryEntity.getName());
+                entity.setRemark(simpleDictionaryEntity.getRemark());
+                entity.setSortNum(simpleDictionaryEntity.getSortNum());
+                entity.setUpdateTime(new Date());
+                simpleDictionaryEntityMapper.updateById(entity);
+            } else {
+                simpleDictionaryEntity.setCreateTime(new Date());
+                simpleDictionaryEntity.setCreateUserId(SecurityUtil.getCurrentUser().getId());
+                simpleDictionaryEntityMapper.insert(simpleDictionaryEntity);
+            }
+        }
+        threadPoolTaskExecutor.execute(() -> {
+            //更新缓存
+            dataToRedis();
+        });
+    }
+
+    @Override
+    public List<TreeNode> getByParentId(Long parentId) {
+        QueryWrapper<SimpleDictionaryEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("parent_id", parentId);
+        queryWrapper.orderByAsc("sort_num", "id");
+        List<SimpleDictionaryEntity> list = simpleDictionaryEntityMapper.selectList(queryWrapper);
+        List<TreeNode> treeNodes = new ArrayList<>();
+        for (SimpleDictionaryEntity simpleDictionaryEntity : list) {
+            TreeNode treeNode = new TreeNode();
+            treeNode.setId(simpleDictionaryEntity.getId());
+            treeNode.setLabel(simpleDictionaryEntity.getName());
+            treeNode.setData(simpleDictionaryEntity);
+            treeNodes.add(treeNode);
+        }
+        return treeNodes;
+    }
+
+    @Override
+    public DictionaryBase databaseGetById(Long id) {
+        SimpleDictionaryEntity simpleDictionaryEntity = simpleDictionaryEntityMapper.selectById(id);
+        if (simpleDictionaryEntity.getParentId().intValue() != 0) {
+            SimpleDictionaryEntity parent = simpleDictionaryEntityMapper.selectById(simpleDictionaryEntity.getParentId());
+            simpleDictionaryEntity.setParentName(parent.getName());
+        }
+        return simpleDictionaryEntity;
     }
 
     @Override
@@ -93,5 +150,18 @@ public class SimpleDictionary extends AbstractDictionaryService<SimpleDictionary
             resultList.addAll(treeNode.getChildren());
         });
         return resultList;
+    }
+
+    private void deleteSimpleDictionary(Long id) {
+        simpleDictionaryEntityMapper.deleteById(id);
+        QueryWrapper<SimpleDictionaryEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("parent_id", id);
+        List<SimpleDictionaryEntity> list = simpleDictionaryEntityMapper.selectList(queryWrapper);
+        if (!list.isEmpty()) {
+            for (SimpleDictionaryEntity simpleDictionaryEntity : list) {
+                deleteSimpleDictionary(simpleDictionaryEntity.getId());
+            }
+        }
+
     }
 }
