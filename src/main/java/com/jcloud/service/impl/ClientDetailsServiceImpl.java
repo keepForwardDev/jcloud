@@ -6,6 +6,7 @@ import com.jcloud.core.service.DefaultOrmService;
 import com.jcloud.core.service.PasswordEncoder;
 import com.jcloud.entity.ClientDetails;
 import com.jcloud.entity.ClientRole;
+import com.jcloud.entity.Role;
 import com.jcloud.entity.User;
 import com.jcloud.mapper.ClientDetailsMapper;
 import com.jcloud.mapper.ClientRoleMapper;
@@ -20,6 +21,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author jiaxm
@@ -47,6 +49,8 @@ public class ClientDetailsServiceImpl extends DefaultOrmService<ClientDetailsMap
                 detail.setCreateUserName(user.getName());
             }
         }
+        List<Role> roles = clientRoleMapper.findByClientId(clientDetails.getId());
+        detail.setRoleIds(roles.stream().map(r -> r.getId()).collect(Collectors.toList()));
         return detail;
     }
 
