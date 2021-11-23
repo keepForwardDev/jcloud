@@ -8,8 +8,11 @@ import com.jcloud.core.service.PasswordEncoder;
 import com.jcloud.entity.User;
 import com.jcloud.mapper.UserMapper;
 import com.jcloud.service.LoginService;
+import com.jcloud.utils.WebUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -27,6 +30,9 @@ public class AccountLoginServiceImpl implements LoginService {
 
     @Autowired
     private SystemProperty systemProperty;
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     public ShiroUser doLogin(String username, String password, String code) {
@@ -52,6 +58,11 @@ public class AccountLoginServiceImpl implements LoginService {
 
     @Override
     public boolean checkCode(String code) {
-        return true;
+        String requestSn = WebUtil.getRequest().getParameter("requestSn");
+        if (StringUtils.isNotBlank(requestSn)) {
+           String codeStr = stringRedisTemplate.opsForValue().get(requestSn);
+           return code.equals(codeStr);
+        }
+        return false;
     }
 }

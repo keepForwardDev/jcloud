@@ -340,6 +340,7 @@ public class UserServiceImpl extends DefaultOrmService<UserMapper, User, UserBea
         for (LoginService loginService : loginServices) {
             if (!loginService.checkCode(code)) {
                 responseData.setMsg(Const.CODE_ERROR_CODE_STR);
+                return responseData;
             }
             if (loginService.supports(loginType)) {
                 shiroUser = loginService.doLogin(username, password, code);
