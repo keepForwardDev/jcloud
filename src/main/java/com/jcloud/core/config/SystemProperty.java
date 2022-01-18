@@ -48,4 +48,13 @@ public class SystemProperty {
      */
     private List<String> notAuthUrls = new ArrayList<>();
 
+    /**
+     * 最大size
+     */
+    private Long maxPageSize = 1000l;
+
+    /**
+     * 加密密码
+     */
+    private String encryptorPassword;
 }

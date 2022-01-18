@@ -1,5 +1,7 @@
 package com.jcloud.utils;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
@@ -7,8 +9,10 @@ import java.util.Date;
 public class TypeUtil {
 
 
+
+
 	public static Long toLon(Object obj) {
-		if (obj == null)
+		if (obj == null || StringUtils.isBlank(obj.toString()))
 			return null;
 		if (obj instanceof Long) {
 			return (Long) obj;
@@ -28,7 +32,11 @@ public class TypeUtil {
 	}
 
 	public static Float toFlo(Object obj) {
-		if (obj instanceof Float) {
+		if (obj == null || StringUtils.isBlank(obj.toString())) {
+			return null;
+		} else if (obj instanceof String) {
+			return Float.valueOf(obj.toString());
+		} else if (obj instanceof Float) {
 			return (Float) obj;
 		} else if (obj instanceof BigInteger) {
 			return ((BigInteger) obj).floatValue();
@@ -37,7 +45,11 @@ public class TypeUtil {
 	}
 
 	public static Double toDou(Object obj) {
-		if (obj instanceof Double) {
+		if (obj == null || StringUtils.isBlank(obj.toString())) {
+			return null;
+		} else if (obj instanceof String) {
+			return Double.valueOf(obj.toString());
+		} else if (obj instanceof Double) {
 			return (Double) obj;
 		} else if (obj instanceof BigInteger) {
 			return ((BigInteger) obj).doubleValue();
@@ -57,7 +69,11 @@ public class TypeUtil {
 	}
 
 	public static Integer toInt(Object obj) {
-		if (obj instanceof Integer) {
+		if (obj == null || StringUtils.isBlank(obj.toString())) {
+			return null;
+		} else if (obj instanceof String) {
+			return Integer.valueOf(obj.toString());
+		} else if (obj instanceof Integer) {
 			return (Integer) obj;
 		} else if (obj instanceof BigDecimal) {
 			return ((BigDecimal) obj).intValue();
@@ -76,5 +92,29 @@ public class TypeUtil {
 		return null;
 	}
 
-
+	/**
+	 * 类型转换，将不同的类型转为给的类型，
+	 *
+	 * @param type 转换的类型
+	 * @param n    需要转换值
+	 * @return
+	 */
+	public static Number castType(Number type, Number n) {
+		if (n == null) {
+			return null;
+		} else if (type instanceof Long) {
+			return n.longValue();
+		} else if (type instanceof BigInteger) {
+			return BigInteger.valueOf(n.longValue());
+		} else if (type instanceof BigDecimal) {
+			return BigDecimal.valueOf(n.longValue());
+		} else if (type instanceof Integer) {
+			return n.intValue();
+		} else if (type instanceof Double) {
+			return n.doubleValue();
+		} else if (type instanceof Float) {
+			return n.floatValue();
+		}
+		return null;
+	}
 }

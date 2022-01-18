@@ -1,5 +1,7 @@
 package com.jcloud.core.support;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.lang.annotation.*;
 
 /**
@@ -34,5 +36,10 @@ public @interface JacksonDicMapping {
      */
     boolean useId() default true;
 
+    /**
+     * 如果是多选的，可以指定分割符,此时Field 为string
+     * @return
+     */
+    String separator() default StringUtils.EMPTY;
 
 }
